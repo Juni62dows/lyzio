@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lyzio — Закрытие портала</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-overlay: rgba(8, 10, 18, 0.78);
+      --card-bg: rgba(18, 22, 36, 0.92);
+      --accent: #7c5cff;
+      --accent-hover: #9478ff;
+      --text: #eef0f6;
+      --text-muted: #a0a8c0;
+      --border: rgba(255, 255, 255, 0.08);
+      --danger: #ff6b6b;
+      --success: #4ade80;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: #0a0c14;
+      line-height: 1.55;
+    }
+
+    body {
+      min-height: 100vh;
+      background-image: url('https://dalam.world/.dw/DalamWorld.back.jpeg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--bg-overlay);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .lang-switcher {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 100;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 280px;
+    }
+
+    .lang-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .lang-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: var(--text);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 720px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(16px);
+    }
+
+    .mascot-wrap {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .mascot {
+      width: 140px;
+      height: auto;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--danger);
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    .content p {
+      margin-bottom: 14px;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+
+    .content p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 28px 0;
+    }
+
+    .recommend {
+      text-align: center;
+    }
+
+    .recommend h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .recommend p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin: 16px 0 24px;
+    }
+
+    .platform-tag {
+      background: rgba(124, 92, 255, 0.15);
+      color: #c4b5fd;
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(124, 92, 255, 0.25);
+    }
+
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #7c5cff, #5b3fd4);
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.05rem;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+      border: none;
+      cursor: pointer;
+    }
+
+    .play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(124, 92, 255, 0.45);
+      background: linear-gradient(135deg, #8f73ff, #6b4fe0);
+    }
+
+    .play-btn:active {
+      transform: translateY(0);
+    }
+
+    .play-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .news-link {
+      display: block;
+      text-align: center;
+      margin-top: 22px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .news-link a {
+      color: #a78bfa;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .news-link a:hover {
+      border-bottom-color: #a78bfa;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 28px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        padding: 28px 20px 32px;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+      .mascot {
+        width: 110px;
+      }
+      .lang-switcher {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="lang-switcher" id="langSwitcher"></div>
+
+  <main class="container">
+    <div class="mascot-wrap">
+      <img class="mascot" src="https://dwstatic.dalam.world/land/1274435011_streetwear--2-3.png.23b65cf316c1567c16aa2329133f126f.png" alt="Dalam World mascot" width="140" height="180">
+    </div>
+
+    <h1 data-i18n="title">Lyzio закрывается</h1>
+    <p class="subtitle" data-i18n="subtitle">Потеряно более 2.5 ТБ данных</p>
+
+    <div class="content">
+      <p data-i18n="p1">Игровой портал <strong>Lyzio</strong> потерял более 2.5 ТБ данных из-за взлома нашего S3-хостинга.</p>
+      <p data-i18n="p2">VPS-серверы, которые раздавали torrent огромное количество файлов, были уничтожены.</p>
+      <p data-i18n="p3">Хостинг-провайдер заявил, что бэкапов S3 у них не осталось. Сайт и VPS хранили все данные именно там.</p>
+      <p data-i18n="p4">В связи с этим мы не видим смысла продолжать Lyzio как игровой портал.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="recommend">
+      <h2 data-i18n="rec_title">Рекомендуем вам</h2>
+      <p data-i18n="rec_text">Отличную игру <strong>Dalam World</strong> — она скоро запускается и доступна на всех платформах.</p>
+
+      <div class="platforms">
+        <span class="platform-tag">Windows</span>
+        <span class="platform-tag">Linux</span>
+        <span class="platform-tag">macOS</span>
+        <span class="platform-tag">Android</span>
+        <span class="platform-tag">iPhone</span>
+        <span class="platform-tag">iPad</span>
+      </div>
+
+      <a class="play-btn" href="https://dalam.world/service/newplayerconnect" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        <span data-i18n="play">Играть</span>
+      </a>
+    </div>
+
+    <p class="news-link">
+      <span data-i18n="news">Подробности инцидента:</span>
+      <a href="https://habr.com/ru/articles/1103190/" target="_blank" rel="noopener">habr.com</a>
+    </p>
+  </main>
+
+  <footer data-i18n="footer">Спасибо, что были с нами. Удачи в новых приключениях!</footer>
+
+  <script>
+    const translations = {
+      ru: {
+        title: "Lyzio закрывается",
+        subtitle: "Потеряно более 2.5 ТБ данных",
+        p1: "Игровой портал <strong>Lyzio</strong> потерял более 2.5 ТБ данных из-за взлома нашего S3-хостинга.",
+        p2: "VPS-серверы, которые раздавали torrent огромное количество файлов, были уничтожены.",
+        p3: "Хостинг-провайдер заявил, что бэкапов S3 у них не осталось. Сайт и VPS хранили все данные именно там.",
+        p4: "В связи с этим мы не видим смысла продолжать Lyzio как игровой портал.",
+        rec_title: "Рекомендуем вам",
+        rec_text: "Отличную игру <strong>Dalam World</strong> — она скоро запускается и доступна на всех платформах.",
+        play: "Играть",
+        news: "Подробности инцидента:",
+        footer: "Спасибо, что были с нами. Удачи в новых приключениях!"
+      },
+      en: {
+        title: "Lyzio is shutting down",
+        subtitle: "Over 2.5 TB of data lost",
+        p1: "The game portal <strong>Lyzio</strong> has lost more than 2.5 TB of data due to a breach of our S3 hosting.",
+        p2: "Our VPS servers that distributed a huge number of files via torrent were destroyed.",
+        p3: "The hosting provider stated that no S3 backups remain. Our website and VPS servers stored all data there.",
+        p4: "Because of this, we see no point in continuing Lyzio as a game portal.",
+        rec_title: "We recommend",
+        rec_text: "An excellent game <strong>Dalam World</strong> — launching soon and available on all platforms.",
+        play: "Play",
+        news: "Incident details:",
+        footer: "Thank you for being with us. Good luck on new adventures!"
+      },
+      uk: {
+        title: "Lyzio закривається",
+        subtitle: "Втрачено понад 2.5 ТБ даних",
+        p1: "Ігровий портал <strong>Lyzio</strong> втратив понад 2.5 ТБ даних через злам нашого S3-хостингу.",
+        p2: "VPS-сервери, які роздавали torrent величезну кількість файлів, були знищені.",
+        p3: "Хостинг-провайдер заявив, що бекапів S3 у них не залишилося. Сайт і VPS зберігали всі дані саме там.",
+        p4: "У зв'язку з цим ми не бачимо сенсу продовжувати Lyzio як ігровий портал.",
+        rec_title: "Рекомендуємо вам",
+        rec_text: "Чудову гру <strong>Dalam World</strong> — вона скоро запускається і доступна на всіх платформах.",
+        play: "Грати",
+        news: "Подробиці інциденту:",
+        footer: "Дякуємо, що були з нами. Удачі в нових пригодах!"
+      },
+      pl: {
+        title: "Lyzio zostaje zamknięte",
+        subtitle: "Utracono ponad 2,5 TB danych",
+        p1: "Portal gier <strong>Lyzio</strong> utracił ponad 2,5 TB danych w wyniku ataku na nasz hosting S3.",
+        p2: "Serwery VPS, które rozdawały torrent ogromną ilość plików, zostały zniszczone.",
+        p3: "Dostawca hostingu oświadczył, że nie pozostały żadne kopie zapasowe S3. Strona i serwery VPS przechowywały wszystkie dane właśnie tam.",
+        p4: "W związku z tym nie widzimy sensu kontynuowania Lyzio jako portalu gier.",
+        rec_title: "Polecamy",
+        rec_text: "Świetną grę <strong>Dalam World</strong> — wkrótce startuje i jest dostępna na wszystkich platformach.",
+        play: "Graj",
+        news: "Szczegóły incydentu:",
+        footer: "Dziękujemy, że byliście z nami. Powodzenia w nowych przygodach!"
+      },
+      hi: {
+        title: "Lyzio बंद हो रहा है",
+        subtitle: "2.5 TB से अधिक डेटा खो गया",
+        p1: "गेम पोर्टल <strong>Lyzio</strong> ने हमारे S3 होस्टिंग के हैक के कारण 2.5 TB से अधिक डेटा खो दिया है।",
+        p2: "हमारे VPS सर्वर, जो टोरेंट के माध्यम से बड़ी संख्या में फ़ाइलें वितरित करते थे, नष्ट कर दिए गए।",
+        p3: "होस्टिंग प्रदाता ने कहा कि उनके पास S3 बैकअप नहीं बचे हैं। हमारी वेबसाइट और VPS सर्वर वहीं सारा डेटा संग्रहीत करते थे।",
+        p4: "इस वजह से, हम Lyzio को गेम पोर्टल के रूप में जारी रखने का कोई मतलब नहीं देखते।",
+        rec_title: "हम अनुशंसा करते हैं",
+        rec_text: "एक शानदार गेम <strong>Dalam World</strong> — जल्द लॉन्च हो रहा है और सभी प्लेटफ़ॉर्म पर उपलब्ध है।",
+        play: "खेलें",
+        news: "घटना का विवरण:",
+        footer: "हमारे साथ रहने के लिए धन्यवाद। नई यात्राओं में शुभकामनाएँ!"
+      },
+      zh: {
+        title: "Lyzio 即将关闭",
+        subtitle: "损失超过 2.5 TB 数据",
+        p1: "游戏门户 <strong>Lyzio</strong> 因我们的 S3 主机被入侵而损失了超过 2.5 TB 的数据。",
+        p2: "通过 torrent 分发大量文件的 VPS 服务器已被销毁。",
+        p3: "主机服务商表示他们已没有 S3 备份。我们的网站和 VPS 服务器的所有数据都存储在那里。",
+        p4: "因此，我们觉得没有必要继续将 Lyzio 作为游戏门户运营。",
+        rec_title: "我们推荐",
+        rec_text: "优秀的游戏 <strong>Dalam World</strong> —— 即将上线，支持所有平台。",
+        play: "开始游戏",
+        news: "事件详情：",
+        footer: "感谢一路相伴。祝新的冒险旅途顺利！"
+      }
+    };
+
+    const langNames = {
+      ru: "RU",
+      en: "EN",
+      uk: "UA",
+      pl: "PL",
+      hi: "HI",
+      zh: "中文"
+    };
+
+    const supported = Object.keys(translations);
+
+    function detectLang() {
+      const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+      if (nav.startsWith("ru")) return "ru";
+      if (nav.startsWith("uk")) return "uk";
+      if (nav.startsWith("pl")) return "pl";
+      if (nav.startsWith("hi")) return "hi";
+      if (nav.startsWith("zh")) return "zh";
+      if (nav.startsWith("en")) return "en";
+      // fallback
+      return "en";
+    }
+
+    function setLang(lang) {
+      if (!translations[lang]) lang = "en";
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : lang;
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (translations[lang][key]) {
+          el.innerHTML = translations[lang][key];
+        }
+      });
+
+      document.querySelectorAll(".lang-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.lang === lang);
+      });
+
+      try {
+        localStorage.setItem("lyzio_lang", lang);
+      } catch (e) {}
+    }
+
+    function init() {
+      const switcher = document.getElementById("langSwitcher");
+      supported.forEach(code => {
+        const btn = document.createElement("button");
+        btn.className = "lang-btn";
+        btn.dataset.lang = code;
+        btn.textContent = langNames[code];
+        btn.addEventListener("click", () => setLang(code));
+        switcher.appendChild(btn);
+      });
+
+      let saved = null;
+      try {
+        saved = localStorage.getItem("lyzio_lang");
+      } catch (e) {}
+
+      const initial = (saved && supported.includes(saved)) ? saved : detectLang();
+      setLang(initial);
+    }
+
+    init();
+  </script>
+</body>
+</html>
