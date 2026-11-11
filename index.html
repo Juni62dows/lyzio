@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Игровой портал Lyzio потерял 2,5+ ТБ данных из-за взлома S3-хостинга. Бэкапов не осталось. Мы закрываем проект и рекомендуем Dalam World.">
+<meta name="theme-color" content="#0e0c09">
+<title>Lyzio закрывается — прощание и благодарность</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Crect width='20' height='20' rx='4' fill='%230e0c09'/%3E%3Crect x='3.4' y='11.6' width='3' height='5.4' rx='1.1' fill='%23ffb03a'/%3E%3Crect x='8.5' y='7.8' width='3' height='9.2' rx='1.1' fill='%23ffb03a'/%3E%3Crect x='13.6' y='3.4' width='3' height='13.6' rx='1.1' fill='%23ffb03a' opacity='.45'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Unbounded — заголовки (кириллица/латиница), Golos Text — текст, JetBrains Mono — терминал,
+     Baloo 2 / Noto — фолбэки для хинди и китайского -->
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&family=Unbounded:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0c09;
+    --line:rgba(255,255,255,.09);
+    --text:#f4efe7;
+    --soft:#cfc6b8;
+    --muted:#a99f90;
+    --dim:#8b8172;
+    --amber:#ffb03a;
+    --red:#ff6455;
+    --f-display:'Unbounded','Baloo 2','Noto Sans SC',sans-serif;
+    --f-body:'Golos Text','Noto Sans Devanagari','Noto Sans SC',sans-serif;
+    --f-mono:'JetBrains Mono','Noto Sans Devanagari','Noto Sans SC',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:var(--f-body);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;overflow-x:clip;
+  }
+  b,strong{font-weight:700}
+  ::selection{background:rgba(255,176,58,.35)}
+  ::-webkit-scrollbar{width:10px}
+  ::-webkit-scrollbar-track{background:#0e0c09}
+  ::-webkit-scrollbar-thumb{background:rgba(255,176,58,.28);border-radius:6px;border:2px solid #0e0c09}
+  a{color:var(--amber)}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:4px}
+  section{scroll-margin-top:80px}
+
+  .wrap{max-width:1080px;margin-inline:auto;padding-inline:clamp(20px,5vw,44px)}
+
+  /* ---------- ФОН: изображение Dalam World + затемнение + зерно ---------- */
+  .bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:var(--bg)}
+  .bg img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    filter:saturate(.85) brightness(.62);
+    animation:bgzoom 36s ease-in-out infinite alternate;
+  }
+  @keyframes bgzoom{from{transform:scale(1.03)}to{transform:scale(1.11)}}
+  .bg .shade{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(10,8,6,.55) 0%, rgba(10,8,6,.9) 78%),
+      linear-gradient(180deg, rgba(11,9,7,.9) 0%, rgba(11,9,7,.8) 45%, rgba(11,9,7,.95) 100%);
+  }
+  .bg .noise{
+    position:absolute;inset:0;opacity:.07;filter:grayscale(1) contrast(140%);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- ШАПКА ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(12,10,7,.6);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .header-in{max-width:1160px;margin:auto;height:62px;padding-inline:clamp(20px,4vw,40px);
+    display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .logo{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}
+  .logo svg{width:19px;height:19px;color:var(--amber)}
+  .logo span{font:700 15px var(--f-display);letter-spacing:.24em}
+  .chip-off{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+    border:1px solid rgba(255,100,85,.35);color:#ff8d80;
+    font:600 10.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;
+  }
+  .chip-off::before,.soon::before{
+    content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;
+    animation:pulse 2.2s ease-out infinite;
+  }
+  .chip-off::before{background:var(--red)}
+  .soon::before{background:var(--amber)}
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(255,140,80,.5)}
+    70%{box-shadow:0 0 0 7px rgba(255,140,80,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,140,80,0)}
+  }
+  .head-right{display:flex;align-items:center;gap:12px}
+
+  /* ---------- переключатель языков ---------- */
+  .lang{position:relative}
+  .lang-btn{
+    display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:12px;cursor:pointer;
+    border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
+    font:500 13px var(--f-body);transition:border-color .25s;
+  }
+  .lang-btn:hover{border-color:rgba(255,176,58,.45)}
+  .lang-btn .globe{width:15px;height:15px;color:var(--amber)}
+  .lang-btn .chev{width:13px;height:13px;color:var(--dim);transition:transform .25s}
+  .lang.open .lang-btn .chev{transform:rotate(180deg)}
+  .lang-menu{
+    position:absolute;right:0;top:calc(100% + 8px);min-width:210px;z-index:60;
+    background:#151009;border:1px solid var(--line);border-radius:14px;padding:6px;
+    box-shadow:0 24px 60px -22px rgba(0,0,0,.75);
+    opacity:0;visibility:hidden;transform:translateY(6px);transition:.22s;
+  }
+  .lang.open .lang-menu{opacity:1;visibility:visible;transform:none}
+  .lang-item{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
+    padding:9px 12px;border:0;border-radius:9px;background:none;cursor:pointer;text-align:left;
+    font:500 13.5px var(--f-body);color:var(--soft);transition:.15s;
+  }
+  .lang-item:hover{background:rgba(255,176,58,.09);color:var(--text)}
+  .lang-item .code{font:600 10px var(--f-mono);letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+  .lang-item.active{color:var(--amber)}
+  .lang-item.active .code{color:rgba(255,176,58,.7)}
+  .lang-sep{height:1px;background:var(--line);margin:6px 6px}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:calc(100vh - 62px);min-height:calc(100svh - 62px);
+    display:flex;flex-direction:column;justify-content:center;
+    padding-top:56px;padding-bottom:64px;
+  }
+  .label{
+    display:flex;align-items:center;gap:12px;margin-bottom:22px;
+    font:500 11.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--amber);
+  }
+  .label .dash{width:24px;height:2px;background:var(--amber);flex:none}
+  .h1{
+    font:800 clamp(2rem, 7.5vw, 4.6rem)/1.06 var(--f-display);
+    letter-spacing:-.01em;max-width:20ch;
+  }
+  .cursor{
+    display:inline-block;width:.55em;height:.85em;margin-left:.14em;
+    background:var(--amber);vertical-align:baseline;transform:translateY(.08em);
+    animation:blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{0%,55%{opacity:1}56%,100%{opacity:0}}
+  .lead{
+    margin-top:24px;max-width:60ch;
+    font-size:clamp(1.02rem, 1.5vw, 1.15rem);line-height:1.72;color:var(--soft);
+  }
+  .lead b{color:var(--text)}
+
+  /* ---------- терминал-отчёт ---------- */
+  .term{
+    margin-top:44px;max-width:780px;overflow:hidden;
+    border:1px solid var(--line);border-radius:16px;
+    background:rgba(13,11,8,.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .term-bar{
+    display:flex;align-items:center;gap:8px;padding:11px 15px;
+    border-bottom:1px solid var(--line);background:rgba(255,255,255,.03);
+  }
+  .term-bar i{width:9px;height:9px;border-radius:50%;opacity:.85}
+  .term-bar i:nth-child(1){background:#ff5f57}
+  .term-bar i:nth-child(2){background:#febc2e}
+  .term-bar i:nth-child(3){background:#28c840}
+  .term-title{margin-left:8px;font:500 11px var(--f-mono);letter-spacing:.08em;color:var(--dim)}
+  .term-body{padding:6px 18px 16px}
+  .trow{
+    display:grid;grid-template-columns:minmax(150px,225px) auto 1fr;gap:16px;align-items:baseline;
+    padding:12px 0;border-bottom:1px dashed rgba(255,255,255,.07);
+    animation:rowIn .55s cubic-bezier(.2,.7,.2,1) both;
+    animation-delay:calc(.5s + var(--i,0)*.13s);
+  }
+  @keyframes rowIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+  .tkey{font:500 12.5px var(--f-mono);color:var(--soft);white-space:nowrap}
+  .tstat{
+    display:inline-flex;align-items:center;gap:7px;
+    font:700 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;
+  }
+  .tstat::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+  .tstat.red{color:var(--red)}
+  .tstat.amber{color:var(--amber)}
+  .tdesc{font-size:13.5px;color:var(--dim)}
+  .tend{
+    padding-top:14px;font:500 12.5px var(--f-mono);color:var(--dim);
+    animation:rowIn .55s both;animation-delay:1.1s;
+  }
+  .tend .cursor{width:.5em;height:1em;background:var(--soft)}
+
+  .hint{
+    margin-top:38px;display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+    font:500 12px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);
+    transition:color .25s;
+  }
+  .hint svg{width:15px;height:15px;animation:bob 2s ease-in-out infinite}
+  .hint:hover{color:var(--amber)}
+  @keyframes bob{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
+
+  /* ---------- секции ---------- */
+  .section{border-top:1px solid var(--line);padding:clamp(64px,9vw,104px) 0}
+  .sec-h{
+    display:flex;align-items:center;gap:14px;
+    font:600 clamp(1.4rem,3vw,2rem)/1.2 var(--f-display);
+  }
+  .sec-h::before{content:'';width:10px;height:10px;background:var(--amber);flex:none}
+
+  /* таймлайн */
+  .tl{list-style:none;margin-top:44px;position:relative}
+  .tl::before{content:'';position:absolute;left:17px;top:14px;bottom:14px;width:1px;background:rgba(255,255,255,.13)}
+  .tl li{display:grid;grid-template-columns:36px 1fr;gap:22px;padding:15px 0;position:relative}
+  .tl-n{
+    width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(255,176,58,.4);background:rgba(255,176,58,.08);
+    font:600 12px var(--f-mono);color:var(--amber);position:relative;z-index:1;
+  }
+  .tl h3{font:600 1.12rem var(--f-body);margin-bottom:6px}
+  .tl p{max-width:62ch;color:var(--muted);font-size:.98rem;line-height:1.7}
+
+  /* заявление */
+  .verdict{
+    position:relative;padding-left:26px;max-width:30ch;
+    font:500 clamp(1.3rem,2.9vw,2.05rem)/1.5 var(--f-display);
+  }
+  .verdict::before{
+    content:'';position:absolute;left:0;top:.45em;bottom:.45em;width:3px;
+    background:var(--amber);border-radius:3px;
+  }
+  .verdict b{color:var(--amber)}
+  .hlink{
+    margin-top:26px;display:inline-flex;align-items:center;gap:9px;text-decoration:none;
+    font:500 13px var(--f-mono);letter-spacing:.06em;color:var(--amber);
+    border-bottom:1px dashed rgba(255,176,58,.4);padding-bottom:3px;transition:.2s;
+  }
+  .hlink svg{width:14px;height:14px}
+  .hlink:hover{border-bottom-style:solid}
+  .thanks{margin-top:36px;max-width:56ch;color:var(--dim);font-size:1rem;line-height:1.75}
+
+  /* ---------- панель Dalam World ---------- */
+  .dw{
+    border:1px solid rgba(255,176,58,.28);border-radius:26px;overflow:hidden;
+    background:rgba(26,20,13,.68);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  }
+  .dw-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:clamp(28px,4.5vw,52px);padding:clamp(28px,4.5vw,52px)}
+  .dw-labelrow{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+  .soon{
+    display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;
+    border:1px solid rgba(255,176,58,.4);color:var(--amber);
+    font:600 10.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;
+  }
+  .dw-h2{font:700 clamp(1.6rem,3.6vw,2.6rem)/1.18 var(--f-display);letter-spacing:-.01em}
+  .dw-p{margin-top:18px;color:var(--soft);line-height:1.72;font-size:1.02rem;max-width:56ch}
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:26px}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;
+    border:1px solid var(--line);background:rgba(255,255,255,.03);
+    font:500 13px var(--f-body);color:#ddd5c7;transition:.2s;
+  }
+  .chip svg{width:15px;height:15px;color:var(--amber)}
+  .chip:hover{border-color:rgba(255,176,58,.5);color:var(--amber)}
+  .dw-actions{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-top:32px}
+  .cta{
+    display:inline-flex;align-items:center;gap:12px;text-decoration:none;
+    background:var(--amber);color:#221203;padding:17px 30px;border-radius:14px;
+    font:600 15px var(--f-display);letter-spacing:.01em;
+    box-shadow:0 12px 34px -14px rgba(255,176,58,.55);
+    transition:transform .22s, background .22s, box-shadow .22s;
+  }
+  .cta svg{width:17px;height:17px}
+  .cta:hover{transform:translateY(-2px);background:#ffc262;box-shadow:0 20px 46px -16px rgba(255,176,58,.65)}
+  .cta:active{transform:translateY(0)}
+  .ghost{
+    display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+    font:500 13px var(--f-mono);color:var(--amber);
+    border-bottom:1px dashed rgba(255,176,58,.4);padding-bottom:3px;transition:.2s;
+  }
+  .ghost svg{width:13px;height:13px}
+  .ghost:hover{border-bottom-style:solid}
+
+  .dw-poster{
+    position:relative;border-radius:18px;overflow:hidden;min-height:340px;
+    border:1px solid rgba(255,255,255,.12);background:#171208;
+  }
+  .dw-poster img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;
+    transition:transform 1.2s cubic-bezier(.2,.7,.2,1);
+  }
+  .dw-poster:hover img{transform:scale(1.045)}
+  .dw-tag{
+    position:absolute;left:14px;bottom:14px;padding:8px 13px;border-radius:999px;
+    background:rgba(10,8,6,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    font:500 11.5px var(--f-mono);letter-spacing:.08em;color:#f0e7d8;
+  }
+  .poster-fallback{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .poster-fallback svg{width:64px;height:64px;color:var(--amber)}
+  .poster-fallback span{font:700 18px var(--f-display);letter-spacing:.2em;color:var(--soft)}
+  .dw-poster.noimg img{display:none}
+  .dw-poster.noimg .poster-fallback{display:flex}
+
+  /* ---------- футер ---------- */
+  footer{border-top:1px solid var(--line);padding:34px 0 44px}
+  .foot-in{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .foot-brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .foot-brand .mark{display:flex;align-items:center;gap:9px;font:700 13px var(--f-display);letter-spacing:.24em}
+  .foot-brand .mark svg{width:15px;height:15px;color:var(--amber)}
+  .foot-note{color:var(--dim);font-size:13px}
+  .foot-links{display:flex;align-items:center;gap:12px;font:500 12.5px var(--f-mono)}
+  .foot-links a{color:var(--dim);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+  .foot-links a svg{width:12px;height:12px}
+  .foot-links a:hover{color:var(--amber)}
+  .foot-links .sep{color:rgba(255,255,255,.18)}
+  .foot-copy{margin-top:16px;font:400 11.5px var(--f-mono);color:rgba(255,255,255,.28)}
+
+  /* ---------- анимации появления ---------- */
+  .fadeup{animation:fadeup .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
+  @keyframes fadeup{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;transition-delay:var(--d,0s)}
+  .rv.in{opacity:1;transform:none}
+
+  @media (max-width:900px){
+    .dw-grid{grid-template-columns:1fr}
+    .dw-poster{min-height:0;aspect-ratio:16/10}
+  }
+  @media (max-width:680px){
+    .chip-off{display:none}
+    .trow{grid-template-columns:1fr auto;row-gap:6px}
+    .tdesc{grid-column:1/-1}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .rv{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<!-- Спрайт иконок -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 20 20">
+      <rect x="2.6" y="12" width="3.2" height="5.6" rx="1.2" fill="currentColor"/>
+      <rect x="8.4" y="7.6" width="3.2" height="10" rx="1.2" fill="currentColor"/>
+      <rect x="14.2" y="3" width="3.2" height="14.6" rx="1.2" fill="currentColor" opacity=".4"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+        <circle cx="12" cy="12" r="8.4"/>
+        <path d="M3.6 12h16.8M12 3.6c2.5 2.3 3.8 5.2 3.8 8.4s-1.3 6.1-3.8 8.4c-2.5-2.3-3.8-5.2-3.8-8.4s1.3-6.1 3.8-8.4z"/>
+      </g>
+    </symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+    </symbol>
+    <symbol id="i-down" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 5v13m0 0 5-5m-5 5-5-5"/>
+    </symbol>
+    <symbol id="i-play" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M8 5.5v13l11-6.5z"/>
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M9 7h8v8"/>
+    </symbol>
+    <symbol id="i-apple" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M17.05 12.54c-.03-2.63 2.15-3.9 2.25-3.96-1.23-1.8-3.15-2.05-3.83-2.08-1.63-.16-3.18.96-4 .96-.83 0-2.1-.94-3.45-.91-1.78.03-3.42 1.03-4.33 2.62-1.85 3.2-.47 7.93 1.33 10.53.88 1.27 1.93 2.7 3.3 2.65 1.33-.05 1.83-.86 3.43-.86 1.6 0 2.05.86 3.45.83 1.43-.03 2.33-1.3 3.2-2.58 1-1.48 1.42-2.92 1.44-3-.03-.01-2.78-1.07-2.79-4.2z"/>
+      <path fill="currentColor" d="M14.44 4.86c.73-.9 1.23-2.14 1.09-3.38-1.06.04-2.35.7-3.11 1.6-.68.78-1.28 2.04-1.12 3.24 1.18.09 2.39-.6 3.14-1.46z"/>
+    </symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M3 5.4l7.6-1v6.9H3zM11.6 4.2 21 3v8.3h-9.4zM3 12.7h7.6v6.9L3 18.6zM11.6 12.7H21V21l-9.4-1.2z"/>
+    </symbol>
+    <symbol id="i-linux" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 4.5h17v15h-17z"/>
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m7.5 9.5 3 2.7-3 2.7M12.8 15.2h4"/>
+    </symbol>
+    <symbol id="i-android" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4.5 17.5a7.5 7.5 0 0 1 15 0M7.4 10.5 5.9 8.3M16.6 10.5l1.5-2.2"/>
+      <circle cx="9" cy="14.3" r="1.15" fill="currentColor"/>
+      <circle cx="15" cy="14.3" r="1.15" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- Фон -->
+<div class="bg" aria-hidden="true">
+  <img src="https://dalam.world/.dw/DalamWorld.back.jpeg" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+  <div class="shade"></div>
+  <div class="noise"></div>
+</div>
+
+<header>
+  <div class="header-in">
+    <a class="logo" href="#top" aria-label="Lyzio">
+      <svg aria-hidden="true"><use href="#i-logo"/></svg>
+      <span>LYZIO</span>
+    </a>
+    <div class="head-right">
+      <span class="chip-off" data-i18n="chip">Серверы отключены</span>
+      <div class="lang" id="langBox">
+        <button class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+          <svg class="globe" aria-hidden="true"><use href="#i-globe"/></svg>
+          <span id="langCur">Русский</span>
+          <svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg>
+        </button>
+        <div class="lang-menu" role="listbox" aria-label="Language">
+          <button class="lang-item" data-lang="auto"><span data-i18n="langAuto">Авто — как в браузере</span><span class="code">auto</span></button>
+          <div class="lang-sep"></div>
+          <button class="lang-item" data-lang="ru"><span>Русский</span><span class="code">ru</span></button>
+          <button class="lang-item" data-lang="en"><span>English</span><span class="code">en</span></button>
+          <button class="lang-item" data-lang="hi"><span>हिन्दी</span><span class="code">hi</span></button>
+          <button class="lang-item" data-lang="zh"><span>中文</span><span class="code">zh</span></button>
+          <button class="lang-item" data-lang="uk"><span>Українська</span><span class="code">uk</span></button>
+          <button class="lang-item" data-lang="pl"><span>Polski</span><span class="code">pl</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ГЕРОЙ + ТЕРМИНАЛ-ОТЧЁТ -->
+  <section class="hero">
+    <div class="wrap">
+      <p class="label fadeup" style="--d:.05s"><span class="dash"></span><span data-i18n="label">Отчёт об инциденте · взлом S3 · потеря 2,5+ ТБ</span></p>
+      <h1 class="h1 fadeup" style="--d:.16s"><span data-i18n="h1">Lyzio закрывается</span><span class="cursor" aria-hidden="true"></span></h1>
+      <p class="lead fadeup" style="--d:.3s" data-i18n="lead">Мы потеряли всё. Наш S3-хостинг взломали, а вместе с ним — 2,5+ терабайта данных и все VPS-серверы, которые раздавали файлы через torrent. Бэкапов не осталось.</p>
+
+      <div class="term fadeup" style="--d:.48s" role="img" aria-label="Статус систем Lyzio">
+        <div class="term-bar"><i></i><i></i><i></i><span class="term-title">lyzio — post-mortem.log</span></div>
+        <div class="term-body">
+          <div class="trow" style="--i:0">
+            <span class="tkey">s3://lyzio-storage</span>
+            <span class="tstat red" data-i18n="t1s">Взломано</span>
+            <span class="tdesc" data-i18n="t1d">2,5+ ТБ данных утеряны безвозвратно</span>
+          </div>
+          <div class="trow" style="--i:1">
+            <span class="tkey">vps · torrent-nodes</span>
+            <span class="tstat red" data-i18n="t2s">Уничтожены</span>
+            <span class="tdesc" data-i18n="t2d">Серверы раздачи файлов через torrent выведены из строя</span>
+          </div>
+          <div class="trow" style="--i:2">
+            <span class="tkey">backups</span>
+            <span class="tstat red" data-i18n="t3s">Отсутствуют</span>
+            <span class="tdesc" data-i18n="t3d">Хостинг-провайдер подтвердил: бэкапов S3 не осталось</span>
+          </div>
+          <div class="trow" style="--i:3">
+            <span class="tkey">lyzio.status</span>
+            <span class="tstat amber" data-i18n="t4s">Закрыт</span>
+            <span class="tdesc" data-i18n="t4d">Портал больше не будет работать</span>
+          </div>
+          <div class="tend">lyzio:~$ shutdown complete<span class="cursor" aria-hidden="true"></span></div>
+        </div>
+      </div>
+
+      <a class="hint fadeup" style="--d:.75s" href="#what">
+        <svg aria-hidden="true"><use href="#i-down"/></svg>
+        <span data-i18n="scrollHint">что произошло</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ЧТО ПРОИЗОШЛО -->
+  <section class="section" id="what">
+    <div class="wrap">
+      <h2 class="sec-h rv" data-i18n="wh">Что произошло</h2>
+      <ol class="tl">
+        <li class="rv">
+          <span class="tl-n">01</span>
+          <div>
+            <h3 data-i18n="s1t">Взлом</h3>
+            <p data-i18n="s1p">Злоумышленники получили доступ к нашему S3-хранилищу у хостинг-провайдера.</p>
+          </div>
+        </li>
+        <li class="rv" style="--d:.1s">
+          <span class="tl-n">02</span>
+          <div>
+            <h3 data-i18n="s2t">Уничтожение</h3>
+            <p data-i18n="s2p">Наши VPS-серверы, раздававшие огромное количество файлов через torrent, были уничтожены.</p>
+          </div>
+        </li>
+        <li class="rv" style="--d:.2s">
+          <span class="tl-n">03</span>
+          <div>
+            <h3 data-i18n="s3t">Бэкапов нет</h3>
+            <p data-i18n="s3p">Провайдер сообщил: бэкапов S3 у него не осталось. Сайт и VPS-серверы были подключены к нему и хранили все данные там.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ЗАЯВЛЕНИЕ -->
+  <section class="section" id="statement">
+    <div class="wrap">
+      <p class="verdict rv" data-i18n-html="verdict">В связи с этим мы не видим смысла продолжать <b>Lyzio</b> как игровой портал.</p>
+      <a class="hlink rv" style="--d:.12s" href="https://habr.com/ru/articles/1103190/" target="_blank" rel="noopener">
+        <span data-i18n="habr">Полный отчёт — на Хабре</span>
+        <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+      </a>
+      <p class="thanks rv" style="--d:.2s" data-i18n="thanks">Спасибо, что были с нами. 2,5 ТБ воспоминаний не вернуть — но они останутся с нами.</p>
+    </div>
+  </section>
+
+  <!-- РЕКОМЕНДАЦИЯ: DALAM WORLD -->
+  <section class="section" id="dalam">
+    <div class="wrap">
+      <div class="dw rv">
+        <div class="dw-grid">
+          <div class="dw-info">
+            <div class="dw-labelrow">
+              <p class="label" style="margin:0"><span class="dash"></span><span data-i18n="dwLabel">А теперь — хорошая новость</span></p>
+              <span class="soon"><span data-i18n="badge">Скоро запуск</span></span>
+            </div>
+            <h2 class="dw-h2" data-i18n="dwH2">Увидимся в Dalam World</h2>
+            <p class="dw-p" data-i18n="dwText">Вместо прощания — подарок. Dalam World — отличная бесплатная онлайн-игра для всех платформ, где можно строить, общаться и играть вместе. Она скоро запустится — мы уже там. Присоединяйтесь.</p>
+            <div class="chips" aria-label="Platforms">
+              <span class="chip"><svg aria-hidden="true"><use href="#i-windows"/></svg>Windows</span>
+              <span class="chip"><svg aria-hidden="true"><use href="#i-linux"/></svg>Linux</span>
+              <span class="chip"><svg aria-hidden="true"><use href="#i-apple"/></svg>macOS</span>
+              <span class="chip"><svg aria-hidden="true"><use href="#i-android"/></svg>Android</span>
+              <span class="chip"><svg aria-hidden="true"><use href="#i-apple"/></svg>iPhone</span>
+              <span class="chip"><svg aria-hidden="true"><use href="#i-apple"/></svg>iPad</span>
+            </div>
+            <div class="dw-actions">
+              <a class="cta" href="https://dalam.world/service/newplayerconnect" target="_blank" rel="noopener">
+                <svg aria-hidden="true"><use href="#i-play"/></svg>
+                <span data-i18n="cta">Играть в Dalam World</span>
+              </a>
+              <a class="ghost" href="https://dalam.world" target="_blank" rel="noopener">
+                dalam.world
+                <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+              </a>
+            </div>
+          </div>
+          <figure class="dw-poster">
+            <img id="mascot" src="https://dwstatic.dalam.world/land/1274435011_streetwear--2-3.png.23b65cf316c1567c16aa2329133f126f.png"
+                 alt="Маскот Dalam World" referrerpolicy="no-referrer"
+                 onerror="this.closest('.dw-poster').classList.add('noimg')">
+            <div class="poster-fallback" aria-hidden="true">
+              <svg><use href="#i-play"/></svg>
+              <span>DALAM WORLD</span>
+            </div>
+            <figcaption class="dw-tag" data-i18n="mascotCap">Маскот Dalam World</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+      <span class="mark"><svg aria-hidden="true"><use href="#i-logo"/></svg>LYZIO</span>
+      <span class="foot-note" data-i18n="footerNote">Страница сохранена как меморандум.</span>
+    </div>
+    <nav class="foot-links" aria-label="Links">
+      <a href="https://habr.com/ru/articles/1103190/" target="_blank" rel="noopener"><span data-i18n="footerHabr">Отчёт на Хабре</span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <span class="sep">·</span>
+      <a href="https://dalam.world" target="_blank" rel="noopener">dalam.world<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </nav>
+  </div>
+  <div class="wrap foot-copy">© Lyzio Team</div>
+</footer>
+
+<script>
+  /* ---------- Словарь локалей ---------- */
+  var ORDER = ['ru','en','hi','zh','uk','pl'];
+  var NATIVE = { ru:'Русский', en:'English', hi:'हिन्दी', zh:'中文', uk:'Українська', pl:'Polski' };
+
+  var T = {
+    ru: {
+      title:"Lyzio закрывается — прощание и благодарность",
+      desc:"Игровой портал Lyzio потерял 2,5+ ТБ данных из-за взлома S3-хостинга. Бэкапов не осталось. Мы закрываем проект и рекомендуем Dalam World.",
+      chip:"Серверы отключены",
+      label:"Отчёт об инциденте · взлом S3 · потеря 2,5+ ТБ",
+      h1:"Lyzio закрывается",
+      lead:"Мы потеряли всё. Наш S3-хостинг взломали, а вместе с ним — 2,5+ терабайта данных и все VPS-серверы, которые раздавали файлы через torrent. Бэкапов не осталось.",
+      t1s:"Взломано", t1d:"2,5+ ТБ данных утеряны безвозвратно",
+      t2s:"Уничтожены", t2d:"Серверы раздачи файлов через torrent выведены из строя",
+      t3s:"Отсутствуют", t3d:"Хостинг-провайдер подтвердил: бэкапов S3 не осталось",
+      t4s:"Закрыт", t4d:"Портал больше не будет работать",
+      scrollHint:"что произошло",
+      wh:"Что произошло",
+      s1t:"Взлом", s1p:"Злоумышленники получили доступ к нашему S3-хранилищу у хостинг-провайдера.",
+      s2t:"Уничтожение", s2p:"Наши VPS-серверы, раздававшие огромное количество файлов через torrent, были уничтожены.",
+      s3t:"Бэкапов нет", s3p:"Провайдер сообщил: бэкапов S3 у него не осталось. Сайт и VPS-серверы были подключены к нему и хранили все данные там.",
+      verdict:"В связи с этим мы не видим смысла продолжать <b>Lyzio</b> как игровой портал.",
+      habr:"Полный отчёт — на Хабре",
+      thanks:"Спасибо, что были с нами. 2,5 ТБ воспоминаний не вернуть — но они останутся с нами.",
+      dwLabel:"А теперь — хорошая новость",
+      badge:"Скоро запуск",
+      dwH2:"Увидимся в Dalam World",
+      dwText:"Вместо прощания — подарок. Dalam World — отличная бесплатная онлайн-игра для всех платформ, где можно строить, общаться и играть вместе. Она скоро запустится — мы уже там. Присоединяйтесь.",
+      cta:"Играть в Dalam World",
+      mascotCap:"Маскот Dalam World",
+      footerNote:"Страница сохранена как меморандум.",
+      footerHabr:"Отчёт на Хабре",
+      langAuto:"Авто — как в браузере"
+    },
+    en: {
+      title:"Lyzio is shutting down — farewell & thank you",
+      desc:"Gaming portal Lyzio lost 2.5+ TB of data to an S3 hosting breach. No backups remain. We are closing the project and recommending Dalam World.",
+      chip:"Servers offline",
+      label:"Incident report · S3 breach · 2.5+ TB lost",
+      h1:"Lyzio is shutting down",
+      lead:"We lost everything. Our S3 hosting was hacked — along with it, <b>2.5+ terabytes of data</b> and every VPS server that shared files over torrent. No backups survived.",
+      t1s:"Breached", t1d:"2.5+ TB of data lost for good",
+      t2s:"Destroyed", t2d:"Torrent file-serving servers taken offline",
+      t3s:"None", t3d:"Hosting provider confirmed: no S3 backups remain",
+      t4s:"Closed", t4d:"The portal will not return",
+      scrollHint:"what happened",
+      wh:"What happened",
+      s1t:"The breach", s1p:"Attackers gained access to our S3 storage at the hosting provider.",
+      s2t:"The destruction", s2p:"Our VPS servers, which served a huge number of files via torrent, were destroyed.",
+      s3t:"No backups", s3p:"The provider told us no S3 backups were left. Our website and VPS servers were attached to it and kept all data there.",
+      verdict:"With that, we see no point in continuing <b>Lyzio</b> as a gaming portal.",
+      habr:"Full report — on Habr",
+      thanks:"Thank you for being with us. The 2.5 TB of memories won\u2019t come back — they stay with us anyway.",
+      dwLabel:"And now — some good news",
+      badge:"Launching soon",
+      dwH2:"See you in Dalam World",
+      dwText:"Instead of a goodbye — a gift. Dalam World is a great free online game for every platform, where you can build, hang out and play together. It launches soon — we\u2019re already there. Join us.",
+      cta:"Play Dalam World",
+      mascotCap:"Dalam World mascot",
+      footerNote:"This page stays up as a memorial.",
+      footerHabr:"Report on Habr",
+      langAuto:"Auto — follow browser"
+    },
+    hi: {
+      title:"Lyzio बंद हो रहा है — विदाई और धन्यवाद",
+      desc:"गेमिंग पोर्टल Lyzio ने S3 होस्टिंग हैक में 2.5+ TB डेटा खो दिया। कोई बैकअप नहीं बचा। हम प्रोजेक्ट बंद कर रहे हैं और Dalam World की सलाह देते हैं।",
+      chip:"सर्वर बंद हैं",
+      label:"घटना रिपोर्ट · S3 हैक · 2.5+ TB की हानि",
+      h1:"Lyzio बंद हो रहा है",
+      lead:"हमने सब कुछ खो दिया। हमारे S3 होस्टिंग को हैक कर लिया गया — और उसके साथ <b>2.5+ टेराबाइट डेटा</b> तथा टोरेंट से फ़ाइलें बाँटने वाले हमारे सभी VPS सर्वर भी चले गए। कोई बैकअप नहीं बचा।",
+      t1s:"हैक हो गया", t1d:"2.5+ TB डेटा हमेशा के लिए चला गया",
+      t2s:"नष्ट", t2d:"टोरेंट फ़ाइल-सर्विंग सर्वर बंद कर दिए गए",
+      t3s:"मौजूद नहीं", t3d:"होस्टिंग प्रोवाइडर ने पुष्टि की: S3 के बैकअप नहीं बचे",
+      t4s:"बंद", t4d:"पोर्टल वापस नहीं आएगा",
+      scrollHint:"क्या हुआ",
+      wh:"क्या हुआ",
+      s1t:"हैक", s1p:"हमलावरों ने होस्टिंग प्रोवाइडर के यहाँ हमारे S3 स्टोरेज तक पहुँच हासिल कर ली।",
+      s2t:"नष्ट होना", s2p:"टोरेंट के ज़रिए बड़ी संख्या में फ़ाइलें बाँटने वाले हमारे VPS सर्वर नष्ट कर दिए गए।",
+      s3t:"कोई बैकअप नहीं", s3p:"प्रोवाइडर ने बताया: उनके पास S3 के बैकअप नहीं बचे। हमारी साइट और VPS सर्वर उन्हीं से जुड़े थे और सारा डेटा वहीं रखा था।",
+      verdict:"इसी वजह से हमें <b>Lyzio</b> को गेमिंग पोर्टल के रूप में जारी रखने का कोई मतलब नहीं दिखता।",
+      habr:"पूरी रिपोर्ट — Habr पर",
+      thanks:"हमारे साथ रहने के लिए धन्यवाद। ढाई टेराबाइट यादें वापस नहीं आएँगी — पर वे हमारे साथ रहेंगी।",
+      dwLabel:"और अब — एक अच्छी खबर",
+      badge:"जल्द लॉन्च",
+      dwH2:"Dalam World में मिलते हैं",
+      dwText:"विदाई की जगह — एक तोहफ़ा। Dalam World हर प्लेटफ़ॉर्म के लिए एक शानदार फ्री ऑनलाइन गेम है, जहाँ आप बना सकते हैं, बातें कर सकते हैं और साथ खेल सकते हैं। यह जल्द लॉन्च होगा — हम वहीं हैं। आइए आप भी।",
+      cta:"Dalam World खेलें",
+      mascotCap:"Dalam World मास्कॉट",
+      footerNote:"यह पेज स्मारक के रूप में यहीं रहेगा।",
+      footerHabr:"Habr पर रिपोर्ट",
+      langAuto:"ऑटो — ब्राउज़र के अनुसार"
+    },
+    zh: {
+      title:"Lyzio 即将关闭 — 告别与感谢",
+      desc:"游戏门户 Lyzio 因 S3 托管遭入侵损失 2.5+ TB 数据，备份无一幸存。我们决定关闭项目，并推荐 Dalam World。",
+      chip:"服务器已停机",
+      label:"事故报告 · S3 遭入侵 · 损失 2.5+ TB",
+      h1:"Lyzio 要关站了",
+      lead:"我们失去了一切。S3 托管被黑客攻破，<b>2.5+ TB 数据</b>以及所有通过 torrent 分发文件的 VPS 服务器随之化为乌有，备份无一幸存。",
+      t1s:"已被入侵", t1d:"2.5+ TB 数据永久丢失",
+      t2s:"已被摧毁", t2d:"Torrent 文件分发服务器全部下线",
+      t3s:"无备份", t3d:"托管商确认：S3 备份已不复存在",
+      t4s:"已关闭", t4d:"门户不会回归",
+      scrollHint:"发生了什么",
+      wh:"发生了什么",
+      s1t:"入侵", s1p:"攻击者获取了我们在托管商处 S3 存储的访问权限。",
+      s2t:"摧毁", s2p:"通过 torrent 分发海量文件的 VPS 服务器全部被摧毁。",
+      s3t:"备份全失", s3p:"托管商告诉我们：S3 的备份已经不存在。我们的网站和 VPS 服务器都连接在它上面，所有数据都存放在那里。",
+      verdict:"因此，我们认为没有必要再以游戏门户的形式继续运营 <b>Lyzio</b>。",
+      habr:"完整报告 — 见 Habr",
+      thanks:"感谢一路相伴。2.5 TB 的回忆回不来了，但它们会一直留在我们心里。",
+      dwLabel:"接下来 — 一个好消息",
+      badge:"即将上线",
+      dwH2:"Dalam World 见",
+      dwText:"与其道别，不如送上一份礼物。Dalam World 是一款覆盖全平台的优秀免费在线游戏，你可以在其中建造、聊天、一起游玩。它即将上线——我们已经在了。来加入我们吧。",
+      cta:"开始游玩 Dalam World",
+      mascotCap:"Dalam World 吉祥物",
+      footerNote:"此页面将作为纪念保留。",
+      footerHabr:"Habr 上的报告",
+      langAuto:"自动 — 跟随浏览器"
+    },
+    uk: {
+      title:"Lyzio закривається — прощання та подяка",
+      desc:"Ігровий портал Lyzio втратив 2,5+ ТБ даних через злом S3-хостингу. Бекапів не залишилося. Ми закриваємо проєкт і рекомендуємо Dalam World.",
+      chip:"Сервери вимкнено",
+      label:"Звіт про інцидент · злом S3 · втрата 2,5+ ТБ",
+      h1:"Lyzio закривається",
+      lead:"Ми втратили все. Наш S3-хостинг зламали, а разом із ним — 2,5+ терабайти даних і всі VPS-сервери, які роздавали файли через torrent. Бекапів не залишилося.",
+      t1s:"Зломано", t1d:"2,5+ ТБ даних втрачено безповоротно",
+      t2s:"Знищено", t2d:"Сервери torrent-роздачі файлів виведено з ладу",
+      t3s:"Відсутні", t3d:"Хостинг-провайдер підтвердив: бекапів S3 не залишилося",
+      t4s:"Закрито", t4d:"Портал більше не працюватиме",
+      scrollHint:"що сталося",
+      wh:"Що сталося",
+      s1t:"Злом", s1p:"Зловмисники отримали доступ до нашого S3-сховища у хостинг-провайдера.",
+      s2t:"Знищення", s2p:"Наші VPS-сервери, що роздавали величезну кількість файлів через torrent, було знищено.",
+      s3t:"Бекапів немає", s3p:"Провайдер повідомив: бекапів S3 у нього не залишилося. Сайт і VPS-сервери були підключені до нього й зберігали там усі дані.",
+      verdict:"У зв'язку з цим ми не бачимо сенсу продовжувати <b>Lyzio</b> як ігровий портал.",
+      habr:"Повний звіт — на Хабрі",
+      thanks:"Дякуємо, що були з нами. 2,5 ТБ спогадів не повернути — але вони залишаться з нами.",
+      dwLabel:"А тепер — добра новина",
+      badge:"Скоро запуск",
+      dwH2:"До зустрічі в Dalam World",
+      dwText:"Замість прощання — подарунок. Dalam World — чудова безкоштовна онлайн-гра для всіх платформ, де можна будувати, спілкуватися й грати разом. Вона скоро запуститься — ми вже там. Приєднуйтесь.",
+      cta:"Грати в Dalam World",
+      mascotCap:"Маскот Dalam World",
+      footerNote:"Сторінку збережено як меморандум.",
+      footerHabr:"Звіт на Хабрі",
+      langAuto:"Авто — як у браузері"
+    },
+    pl: {
+      title:"Lyzio się zamyka — pożegnanie i podziękowania",
+      desc:"Portal gamingowy Lyzio stracił 2,5+ TB danych przez atak na hosting S3. Kopie zapasowe nie przetrwały. Zamykamy projekt i polecamy Dalam World.",
+      chip:"Serwery wyłączone",
+      label:"Raport z incydentu · atak na S3 · utrata 2,5+ TB",
+      h1:"Lyzio się zamyka",
+      lead:"Straciliśmy wszystko. Nasz hosting S3 został zhakowany — a wraz z nim 2,5+ terabajta danych i wszystkie serwery VPS, które udostępniały pliki przez torrent. Kopie zapasowe nie przetrwały.",
+      t1s:"Zhakowany", t1d:"Bezpowrotnie utracono 2,5+ TB danych",
+      t2s:"Zniszczone", t2d:"Serwery torrent-udostępniania plików wyłączone",
+      t3s:"Brak", t3d:"Dostawca hostingu potwierdził: kopie zapasowe S3 nie przetrwały",
+      t4s:"Zamknięty", t4d:"Portal nie wróci",
+      scrollHint:"co się stało",
+      wh:"Co się stało",
+      s1t:"Atak", s1p:"Napastnicy uzyskali dostęp do naszej pamięci S3 u dostawcy hostingu.",
+      s2t:"Zniszczenie", s2p:"Nasze serwery VPS, które udostępniały ogromną liczbę plików przez torrent, zostały zniszczone.",
+      s3t:"Brak kopii", s3p:"Dostawca poinformował: kopii zapasowych S3 już nie ma. Nasza strona i serwery VPS były z nim połączone i tam przechowywały wszystkie dane.",
+      verdict:"W związku z tym nie widzimy sensu w dalszym prowadzeniu <b>Lyzio</b> jako portalu gamingowego.",
+      habr:"Pełny raport — na Habrze",
+      thanks:"Dziękujemy, że byliście z nami. 2,5 TB wspomnień nie wróci — ale zostaną z nami.",
+      dwLabel:"A teraz — dobra wiadomość",
+      badge:"Wkrótce premiera",
+      dwH2:"Do zobaczenia w Dalam World",
+      dwText:"Zamiast pożegnania — prezent. Dalam World to świetna darmowa gra online na każdą platformę, gdzie można budować, rozmawiać i grać razem. Startuje wkrótce — my już tam jesteśmy. Dołączcie.",
+      cta:"Zagraj w Dalam World",
+      mascotCap:"Maskotka Dalam World",
+      footerNote:"Strona pozostaje jako memoriał.",
+      footerHabr:"Raport na Habrze",
+      langAuto:"Auto — jak w przeglądarce"
+    }
+  };
+
+  /* ---------- Автодетект языка браузера ---------- */
+  function detect(){
+    var list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'en'];
+    for (var i = 0; i < list.length; i++){
+      var l = String(list[i]).toLowerCase();
+      if (l.indexOf('zh') === 0) return 'zh';
+      var base = l.split('-')[0];
+      if (ORDER.indexOf(base) !== -1) return base;
+    }
+    return 'ru';
+  }
+
+  /* ---------- Применение локали ---------- */
+  function applyLang(l){
+    var d = T[l]; if (!d) return;
+    document.documentElement.lang = l;
+    document.title = d.title;
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute('content', d.desc);
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var v = d[el.dataset.i18n]; if (v != null) el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+      var v = d[el.dataset.i18nHtml]; if (v != null) el.innerHTML = v;
+    });
+    var m = document.getElementById('mascot');
+    if (m) m.alt = d.mascotCap;
+    document.getElementById('langCur').textContent = NATIVE[l];
+    document.querySelectorAll('.lang-item').forEach(function(b){
+      b.classList.toggle('active', b.dataset.lang === l);
+    });
+  }
+
+  function setLang(l){
+    try { localStorage.setItem('lyzio-lang', l); } catch(e){}
+    applyLang(l);
+  }
+
+  /* Первый запуск: сохранённый выбор → иначе автодетект */
+  (function(){
+    var saved = null;
+    try { saved = localStorage.getItem('lyzio-lang'); } catch(e){}
+    applyLang(saved && ORDER.indexOf(saved) !== -1 ? saved : detect());
+  })();
+
+  /* ---------- Выпадающее меню языков ---------- */
+  var box = document.getElementById('langBox');
+  var btn = document.getElementById('langBtn');
+  function closeMenu(){ box.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = box.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){ if (!box.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeMenu(); });
+  document.querySelectorAll('.lang-item').forEach(function(b){
+    b.addEventListener('click', function(){
+      if (b.dataset.lang === 'auto'){
+        try { localStorage.removeItem('lyzio-lang'); } catch(e){}
+        applyLang(detect());
+      } else {
+        setLang(b.dataset.lang);
+      }
+      closeMenu();
+    });
+  });
+
+  /* ---------- Появление блоков при скролле ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: .12 });
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+</script>
+</body>
+</html>
